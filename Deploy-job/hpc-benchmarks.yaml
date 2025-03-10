@@ -1,0 +1,76 @@
+kind: Job
+apiVersion: batch/v1
+metadata:
+  name: hpc-benchmarks
+  namespace: u-workbench-ys4680
+  labels:
+    app: hpc-benchmarks
+    app.kubernetes.io/component: hpc-benchmarks
+    app.kubernetes.io/instance: hpc-benchmarks
+    app.kubernetes.io/name: hpc-benchmarks
+    app.openshift.io/runtime-namespace: u-workbench-ys4680
+spec:
+  parallelism: 1
+  completions: 4
+  template:
+    metadata:
+      labels:
+        app: hpc-benchmarks
+        deployment: hpc-benchmarks
+    spec:
+      volumes:
+        - name: home
+          persistentVolumeClaim:
+            claimName: ys4680-data
+        - name: tmp
+          emptyDir:
+            sizeLimit: 100Gi
+        - name: cache-volume
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1000Mi
+      containers:
+        - resources:
+            limits:
+              cpu: "4"
+              memory: 20Gi
+              nvidia.com/gpu: "4"
+            requests:
+              cpu: "4"
+              memory: 20Gi
+              nvidia.com/gpu: "4"
+          name: hpc-benchmarks
+          volumeMounts:
+            - name: home
+              mountPath: /home
+            - name: tmp
+              mountPath: /scratch
+            - name: cache-volume
+              mountPath: /dev/shm
+          image: >-
+            nvcr.io/nvidia/hpc-benchmarks:25.02
+          env:
+            - name: TZ
+              value: America/New_York
+            - name: HOME
+              value: /home/ys4680
+          command:
+            - /bin/bash
+            - "-c"
+            - |
+              # sleep infinity
+              mkdir -p /home/hpl # Change to your home directory
+              cp -r hpl-linux-x86_64/sample-dat/ /home/hpl/
+              cd /home/hpl/sample-dat
+              sed -i 's/190464[[:space:]]*Ns/95232       Ns/' HPL-4GPUs.dat
+              mpiexec -n 4 /workspace/hpl.sh --dat HPL-4GPUs.dat 2>&1 | tee stdout.log
+              sleep 600
+      restartPolicy: Never
+      tolerations:
+        - effect: NoSchedule
+          key: nvidia.com/usage
+          operator: Equal
+          value: dedicated
+        - effect: NoSchedule
+          key: nvidia.com/gpu
+          operator: Exists

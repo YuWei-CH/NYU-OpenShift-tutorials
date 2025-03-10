@@ -1,4 +1,4 @@
-# Deploy a image to Quay use podman
+# Push a image to Quay use podman
 
 ## Before Start:
 
