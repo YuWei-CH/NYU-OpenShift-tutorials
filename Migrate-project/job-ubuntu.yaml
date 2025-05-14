@@ -1,0 +1,74 @@
+kind: Job
+apiVersion: batch/v1
+metadata:
+  name: ubuntu-test
+  namespace: u-workbench-ys4680
+  labels:
+    app: ubuntu
+    app.kubernetes.io/component: ubuntu
+    app.kubernetes.io/instance: ubuntu
+    app.kubernetes.io/name: ubuntu
+    app.openshift.io/runtime-namespace: u-workbench-ys4680
+
+spec:
+  parallelism: 1
+  completions: 1
+  completionMode: Indexed
+  selector:
+    matchLabels:
+  template:
+    metadata:
+      labels:
+        app: ubuntu
+        deployment: ubuntu
+    spec:
+      volumes:
+        - name: home
+          persistentVolumeClaim:
+            claimName: ys4680-data
+        - name: tmp
+          emptyDir:
+            sizeLimit: 20Gi
+        - name: etc-passwd
+          configMap:
+            name: etc-passwd
+      containers:
+        - resources:
+            limits:
+              cpu: "48"
+              memory: 96Gi
+            requests:
+              cpu: "2"
+              memory: 8Gi
+          name: ubuntu
+          volumeMounts:
+            - name: home
+              mountPath: /home
+            - name: tmp
+              mountPath: /tmp
+            - name: etc-passwd
+              mountPath: /etc/passwd
+              subPath: etc-passwd
+              readOnly: true
+          image: >-
+            registry.cloud.rt.nyu.edu/sw77/test:01
+          env:
+            - name: TZ
+              value: America/New_York
+            - name: HOME
+              value: /home/ys4680
+            - name: USER
+              value: ys4680
+            - name: MY_POD_INDEX
+              valueFrom:
+                fieldRef:
+                  fieldPath: "metadata.labels['batch.kubernetes.io/job-completion-index']"
+          workingDir: /home/ys4680
+          securityContext:
+            runAsUser: 1002160000
+          command:
+            - /bin/bash
+            - "-c"
+            - |
+              sleep infinity
+      restartPolicy: Never

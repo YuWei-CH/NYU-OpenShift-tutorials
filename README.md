@@ -12,13 +12,15 @@ Whether you're new to OpenShift or looking to deploy apps in a university or res
 - Integrating OpenShift with GitHub, container registries, and external storage
 
 ## Repository Structure
-NYU-OpenShift-tutorials/
-├── OpenShift-Intro/           # Introduction of OC commands, OpenShift console, Login Token
-├── Push-images/               # Introduction to Quay, Podmand commands, and buidling an image
-├── Deploy-job/                # How to deploy a job to OpenShift and GPU Application Example
+```
+NYU-OpenShift-tutorials/  
+├── OpenShift-Intro/           # Introduction of OC commands, OpenShift console, Login Token  
+├── Push-images/               # Introduction to Quay, Podmand commands, and buidling an image  
+├── Deploy-job/                # How to deploy a job to OpenShift and GPU Application Example  
 ├── Data-transfer/             # OC copy, rsync command, and how to use linux share command on OpenShift
-├── README.md                  # You’re here!
-
+├── Migrate-project/           # Migrate a project(environment) from Greene to Openshift
+├── README.md                  # You’re here!  
+```
 ## Prerequisites
 
 - NYU VPN Access
